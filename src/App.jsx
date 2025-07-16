@@ -1,6 +1,7 @@
 import './index.css';
 import logo from './assets/aggies-logo.png';
 import aboutUs from './assets/agnes_about_us.png';
+import facebookIcon from './assets/facebook_logo.svg';
 import { useState } from 'react';
 import emailjs from '@emailjs/browser';
 
@@ -205,36 +206,22 @@ function App() {
 
       {/* Footer */}
       <footer style={{
-          background: "#8b5e3c",
-          color: "white",
-          padding: "1rem",
-          textAlign: "center",
-          borderRadius: 12,
-          width: "90%",
-          maxWidth: 800
-          }}>
-          <p>
-            Follow us on{" "}
-            <a href="https://www.facebook.com/profile.php?id=100057408972727"
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ color: 'white', textDecoration: 'underline' }}>
-              Facebook
-            </a>
-            <br />
-            Follow Aggie's Attic Furniture Shed on{" "}
-            <a href="https://www.facebook.com/profile.php?id=100070282226048"
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ color: 'white', textDecoration: 'underline' }}>
-              Facebook
-            </a>
-          </p>
-          <p style={{ margin: 0, fontSize: 14 }}>
-            &copy; {new Date().getFullYear()} Aggie's Attic. All rights reserved.
-          </p>
-        </footer>
-
+        background: "#8b5e3c", // lighter, warm taupe for better contrast
+        color: "white",
+        padding: "1rem",
+        textAlign: "center",
+        borderRadius: 12,
+        width: "90%",
+        maxWidth: 800
+      }}>
+        <p>
+          Follow us on <img src={facebookIcon} alt="Facebook" style={{ width: 20, height: 20 }} /><a href="https://www.facebook.com/profile.php?id=100057408972727" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-teal)', textDecoration: 'underline' }}>Facebook</a>
+        <br />Follow Aggie's Attic Furniture Shed on <img src={facebookIcon} alt="Facebook" style={{ width: 20, height: 20 }} /><a href="https://www.facebook.com/profile.php?id=100070282226048" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-teal)', textDecoration: 'underline' }}>Facebook</a>
+        </p>
+        <p style={{ margin: 0, fontSize: 14 }}>
+          &copy; {new Date().getFullYear()} Aggie's Attic. All rights reserved.
+        </p>
+      </footer>
 
       {showModal && (
         <div style={{
