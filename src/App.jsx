@@ -205,7 +205,7 @@ function App() {
 
       {/* Footer */}
       <footer style={{
-        background: "var(--color-taupe)",
+        background: "#8b5e3c", // lighter, warm taupe for better contrast
         color: "white",
         padding: "1rem",
         textAlign: "center",
