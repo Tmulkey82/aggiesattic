@@ -1,0 +1,17 @@
+:root {
+  --color-bg: #FFF7ED;
+  --color-sage: #BCC9A4;
+  --color-taupe: #A28F7A;
+  --color-teal: #6DA4A8;
+  --color-sky: #E3EEF1;
+  --color-terra: #E39C6D;
+  --color-walnut: #5B4636;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-walnut);
+  font-family: 'Nunito', 'Open Sans', Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+}
