@@ -215,6 +215,7 @@ function App() {
       }}>
         <p>
           Follow us on <a href="https://www.facebook.com/profile.php?id=100057408972727" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-teal)', textDecoration: 'underline' }}>Facebook</a>
+        <br />Follow Aggies Furiture on <a href="https://www.facebook.com/profile.php?id=100070282226048" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-teal)', textDecoration: 'underline' }}>Facebook</a>
         </p>
         <p style={{ margin: 0, fontSize: 14 }}>
           &copy; {new Date().getFullYear()} Aggies Attic. All rights reserved.
