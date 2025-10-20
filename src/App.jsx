@@ -199,8 +199,10 @@ function App() {
           marginBottom: 16,
         }}>Events</h2>
         <div>
-          <strong>Spring Sale</strong><br />
-          Friday, April 12
+          <strong>Yard Sale</strong><br />
+          Saturday, October 25<br />
+          At Greenwood United Methodist Church<br />
+          10040 Greenwood Rd, Glen Allen, VA 23060<br />
         </div>
       </section>
 
