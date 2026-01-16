@@ -19,3 +19,14 @@ export const uploadImage = async (filePath) => {
 export const deleteImage = async (publicId) => {
   return cloudinary.uploader.destroy(publicId);
 };
+
+export const uploadImageWithMeta = async (filePath) => {
+  const result = await cloudinary.uploader.upload(filePath, {
+    folder: "aggies-attic",
+  });
+
+  return {
+    url: result.secure_url,
+    publicId: result.public_id, // includes folder
+  };
+};
