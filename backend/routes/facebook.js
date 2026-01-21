@@ -1,7 +1,7 @@
 // backend/routes/facebook.js
 import express from "express";
 import auth from "../middleware/authMiddleware.js"; // protect if you want
-import { postText, postPhotoByUrl, getRecentPosts } from "../services/facebookService.js";
+import { postToFeed, postPhotoByUrl, getRecentPosts } from "../services/facebookService.js";
 
 const router = express.Router();
 
@@ -9,7 +9,7 @@ const router = express.Router();
 router.post("/test-text", /*auth,*/ async (req, res) => {
   try {
     const { message = "Hello from Aggie’s Attic 👋" } = req.body || {};
-    const data = await postText(message);
+    const data = await postToFeed({ message });
     res.json({ ok: true, data });
   } catch (err) {
     const error = err.response?.data || err.message;
@@ -22,7 +22,7 @@ router.post("/test-photo", /*auth,*/ async (req, res) => {
   try {
     const { imageUrl, caption = "" } = req.body || {};
     if (!imageUrl) return res.status(400).json({ ok: false, error: "imageUrl required" });
-    const data = await postPhotoByUrl(imageUrl, caption);
+    const data = await postPhotoByUrl({ imageUrl, caption });
     res.json({ ok: true, data });
   } catch (err) {
     const error = err.response?.data || err.message;

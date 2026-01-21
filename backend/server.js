@@ -1,9 +1,7 @@
-// server.js
 import express from "express";
 import cors from "cors";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
-
 import eventRoutes from "./routes/events.js";
 import authRoutes from "./routes/auth.js";
 import listingRoutes from "./routes/listings.js";
@@ -14,49 +12,44 @@ dotenv.config();
 
 const app = express();
 
-// --- Core middleware ---
-app.use(express.json());
-
-// --- CORS ---
-// In production, restrict to your Vercel domain via CORS_ORIGIN.
-// If CORS_ORIGIN is not set, fall back to allowing all origins (useful for local/dev).
-const allowedOrigin = process.env.CORS_ORIGIN;
+// ---- CORS (single origin response, supports www + non-www) ----
+const allowedOrigins = new Set([
+  "https://aggiesattic.org",
+  "https://www.aggiesattic.org",
+  "http://localhost:5173",
+]);
 
 app.use(
   cors({
-    origin: allowedOrigin || "*",
-    credentials: false,
+    origin: (origin, callback) => {
+      // Non-browser clients (curl, server-to-server) may send no Origin header
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.has(origin)) return callback(null, true);
+
+      return callback(new Error(`CORS blocked for origin: ${origin}`));
+    },
+    credentials: true,
   })
 );
 
-// --- Health check (Fly + quick debugging) ---
-app.get("/health", (req, res) => res.status(200).send("ok"));
+app.use(express.json());
 
-// --- Routes ---
 app.use("/upload-image", uploadRoutes);
 app.use("/api/facebook", facebookRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/listings", listingRoutes);
 app.use("/api/events", eventRoutes);
 
-// --- Startup / DB ---
-const PORT = Number(process.env.PORT) || 8080;
-const HOST = "0.0.0.0";
-
-if (!process.env.MONGO_URI) {
-  console.error("FATAL: MONGO_URI is not set.");
-  process.exit(1);
-}
+// ---- Mongo + server ----
+const port = Number(process.env.PORT) || 8080;
 
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => {
     console.log("MongoDB connected");
-    app.listen(PORT, HOST, () => {
-      console.log(`Server running on ${HOST}:${PORT}`);
+    app.listen(port, "0.0.0.0", () => {
+      console.log(`Server running on port ${port}`);
     });
   })
-  .catch((err) => {
-    console.error("MongoDB connection error:", err);
-    process.exit(1);
-  });
+  .catch((err) => console.error(err));

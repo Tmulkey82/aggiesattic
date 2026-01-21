@@ -22,6 +22,13 @@ const eventSchema = new mongoose.Schema(
     // Optional images
     images: { type: [eventImageSchema], default: [] },
 
+    // Facebook sync (best-effort). We store the Page post id so we can update/delete it later.
+    facebook: {
+      postId: { type: String, default: null },
+      lastSyncedAt: { type: Date, default: null },
+      lastError: { type: String, default: null },
+    },
+
     // Not displayed on the frontend
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "Admin" },
   },

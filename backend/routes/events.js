@@ -5,6 +5,7 @@ import authMiddleware from "../middleware/authMiddleware.js";
 import multer from "multer";
 import fs from "fs";
 import { uploadImageWithMeta, deleteImage } from "../services/cloudinaryService.js";
+import { createEventPost, replaceEventPost, deletePost } from "../services/facebookService.js";
 
 const router = express.Router();
 const upload = multer({ dest: "uploads/" });
@@ -82,6 +83,35 @@ router.post("/", authMiddleware, async (req, res) => {
     });
 
     await event.save();
+
+    // Best-effort: if images changed, replace the Facebook post so the post includes the first image.
+    try {
+      const posted = await replaceEventPost({ previousPostId: event.facebook?.postId, event });
+      event.facebook.postId = posted.postId;
+      event.facebook.lastSyncedAt = new Date();
+      event.facebook.lastError = null;
+      await event.save();
+    } catch (fbErr) {
+      const meta = fbErr.response?.data || fbErr.message;
+      console.warn("Facebook update failed after image upload (continuing):", meta);
+      event.facebook.lastError = typeof meta === "string" ? meta : JSON.stringify(meta);
+      await event.save();
+    }
+
+    // Best-effort: create Facebook post immediately.
+    try {
+      const posted = await createEventPost(event);
+      event.facebook.postId = posted.postId;
+      event.facebook.lastSyncedAt = new Date();
+      event.facebook.lastError = null;
+      await event.save();
+    } catch (fbErr) {
+      const meta = fbErr.response?.data || fbErr.message;
+      console.warn("Facebook post failed (event created anyway):", meta);
+      event.facebook.lastError = typeof meta === "string" ? meta : JSON.stringify(meta);
+      await event.save();
+    }
+
     res.status(201).json(event);
   } catch (err) {
     console.error("Error creating event:", err);
@@ -98,19 +128,30 @@ router.put("/:id", authMiddleware, async (req, res) => {
 
     const { title, description, date, endDate } = req.body;
 
-    const updated = await Event.findByIdAndUpdate(
-      req.params.id,
-      {
-        title,
-        description,
-        date: date ? new Date(date) : null,
-        endDate: endDate ? new Date(endDate) : null,
-      },
-      { new: true, runValidators: true }
-    );
+    const existing = await Event.findById(req.params.id);
+    if (!existing) return res.status(404).json({ message: "Event not found" });
 
-    if (!updated) return res.status(404).json({ message: "Event not found" });
-    res.json(updated);
+    existing.title = title;
+    existing.description = description;
+    existing.date = date ? new Date(date) : null;
+    existing.endDate = endDate ? new Date(endDate) : null;
+
+    await existing.save();
+
+    // Best-effort: replace the Facebook post to reflect edits.
+    try {
+      const posted = await replaceEventPost({ previousPostId: existing.facebook?.postId, event: existing });
+      existing.facebook.postId = posted.postId;
+      existing.facebook.lastSyncedAt = new Date();
+      existing.facebook.lastError = null;
+      await existing.save();
+    } catch (fbErr) {
+      const meta = fbErr.response?.data || fbErr.message;
+      console.warn("Facebook update failed (event updated anyway):", meta);
+      existing.facebook.lastError = typeof meta === "string" ? meta : JSON.stringify(meta);
+      await existing.save();
+    }
+    res.json(existing);
   } catch (err) {
     console.error("Error updating event:", err);
     res.status(400).json({ message: err.message || "Error updating event" });
@@ -145,6 +186,21 @@ router.post("/:id/images", authMiddleware, upload.array("images"), async (req, r
     }
 
     await event.save();
+
+    // Best-effort: if the event has a Facebook post, replace it so media/caption stay in sync.
+    try {
+      const posted = await replaceEventPost({ previousPostId: event.facebook?.postId, event });
+      event.facebook.postId = posted.postId;
+      event.facebook.lastSyncedAt = new Date();
+      event.facebook.lastError = null;
+      await event.save();
+    } catch (fbErr) {
+      const meta = fbErr.response?.data || fbErr.message;
+      console.warn("Facebook resync failed after image upload (continuing):", meta);
+      event.facebook.lastError = typeof meta === "string" ? meta : JSON.stringify(meta);
+      await event.save();
+    }
+
     res.status(201).json({ images: event.images, uploaded });
   } catch (err) {
     console.error("Error uploading event images:", err);
@@ -175,6 +231,20 @@ router.delete("/:id/images/:imageId", authMiddleware, async (req, res) => {
     image.deleteOne();
     await event.save();
 
+    // Best-effort: keep Facebook in sync (delete+repost).
+    try {
+      const posted = await replaceEventPost({ previousPostId: event.facebook?.postId, event });
+      event.facebook.postId = posted.postId;
+      event.facebook.lastSyncedAt = new Date();
+      event.facebook.lastError = null;
+      await event.save();
+    } catch (fbErr) {
+      const meta = fbErr.response?.data || fbErr.message;
+      console.warn("Facebook resync failed after image delete (continuing):", meta);
+      event.facebook.lastError = typeof meta === "string" ? meta : JSON.stringify(meta);
+      await event.save();
+    }
+
     res.json({ images: event.images });
   } catch (err) {
     console.error("Error deleting event image:", err);
@@ -191,6 +261,16 @@ router.delete("/:id", authMiddleware, async (req, res) => {
 
     const event = await Event.findById(req.params.id);
     if (!event) return res.status(404).json({ message: "Event not found" });
+
+    // Best-effort: delete the Facebook post first.
+    if (event.facebook?.postId) {
+      try {
+        await deletePost(event.facebook.postId);
+      } catch (fbErr) {
+        const meta = fbErr.response?.data || fbErr.message;
+        console.warn("Facebook delete failed (continuing):", meta);
+      }
+    }
 
     // Best-effort delete associated Cloudinary images
     const publicIds = (event.images || [])
