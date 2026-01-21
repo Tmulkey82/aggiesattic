@@ -1,6 +1,19 @@
 {
+  "redirects": [
+    {
+      "source": "/admin",
+      "destination": "https://www.aggiesadmin.org/admin",
+      "permanent": false
+    }
+  ],
   "rewrites": [
-    { "source": "/api/(.*)",
-      "destination":"https://aggies-attic-backend.fly.dev/api/$1"}
+    {
+      "source": "/api/(.*)",
+      "destination": "https://aggies-attic-backend.fly.dev/api/$1"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/"
+    }
   ]
 }
