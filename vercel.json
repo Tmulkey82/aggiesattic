@@ -1,5 +1,6 @@
 {
   "rewrites": [
-    { "source": "/(.*)", "destination": "/" }
+    { "source": "/api/(.*)",
+      "destination":"https://aggies-attic-backend.fly.dev/api/$1"}
   ]
 }
