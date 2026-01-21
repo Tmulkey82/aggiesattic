@@ -1,5 +1,33 @@
 import mongoose from "mongoose";
 
+function normalizeDateOnlyToUtcNoon(value) {
+  if (!value) return null;
+
+  // If already a Date, keep as-is
+  if (value instanceof Date) {
+    return isNaN(value.getTime()) ? null : value;
+  }
+
+  // If it's a string like "YYYY-MM-DD", normalize to 12:00 UTC
+  if (typeof value === "string") {
+    const m = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (m) {
+      const y = Number(m[1]);
+      const mo = Number(m[2]);
+      const d = Number(m[3]);
+      return new Date(Date.UTC(y, mo - 1, d, 12, 0, 0));
+    }
+
+    // Fall back: try parsing other string formats
+    const parsed = new Date(value);
+    return isNaN(parsed.getTime()) ? null : parsed;
+  }
+
+  // If it's a number (timestamp) or other, let Date try
+  const parsed = new Date(value);
+  return isNaN(parsed.getTime()) ? null : parsed;
+}
+
 const eventImageSchema = new mongoose.Schema(
   {
     url: { type: String, required: true },
@@ -15,9 +43,9 @@ const eventSchema = new mongoose.Schema(
     title: { type: String, required: true, trim: true },
     description: { type: String, required: true, trim: true },
 
-    // Optional dates
-    date: { type: Date, default: null },
-    endDate: { type: Date, default: null },
+    // Optional dates (date-only behavior; stored as UTC noon to avoid TZ day-shift)
+    date: { type: Date, default: null, set: normalizeDateOnlyToUtcNoon },
+    endDate: { type: Date, default: null, set: normalizeDateOnlyToUtcNoon },
 
     // Optional images
     images: { type: [eventImageSchema], default: [] },
