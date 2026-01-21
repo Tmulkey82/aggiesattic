@@ -405,6 +405,12 @@ function PublicHome() {
           >
             Facebook
           </a>
+          <br />
+          Visit <a
+                  href="https://www.gumcva.org/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ color: "var(--color-teal)", textDecoration: "underline" }}>Greenwood United Methodist Church</a>
         </p>
         <p style={{ margin: 0, fontSize: 14 }}>
           &copy; {new Date().getFullYear()} Aggie's Attic. All rights reserved.
