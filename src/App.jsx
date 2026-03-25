@@ -43,6 +43,7 @@ function PublicEvents() {
   const [events, setEvents] = useState([]);
   const [busy, setBusy] = useState(true);
   const [error, setError] = useState("");
+  const [selectedImage, setSelectedImage] = useState(null);
 
   async function load() {
     setError("");
@@ -74,87 +75,172 @@ function PublicEvents() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    function handleKeyDown(e) {
+      if (e.key === "Escape") {
+        setSelectedImage(null);
+      }
+    }
+
+    if (selectedImage) {
+      window.addEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = "hidden";
+    }
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = "";
+    };
+  }, [selectedImage]);
+
   return (
-    <section
-      style={{
-        width: "100%",
-        maxWidth: 720,
-        margin: "0 auto 48px auto",
-        background: "var(--color-sky)",
-        padding: 20,
-        borderRadius: 12,
-        boxShadow: "0 2px 8px rgba(120,80,40,0.06)",
-      }}
-    >
-      <h2 style={{ color: "var(--color-walnut)", marginBottom: 8 }}>Events</h2>
+    <>
+      <section
+        style={{
+          width: "100%",
+          maxWidth: 720,
+          margin: "0 auto 48px auto",
+          background: "var(--color-sky)",
+          padding: 20,
+          borderRadius: 12,
+          boxShadow: "0 2px 8px rgba(120,80,40,0.06)",
+        }}
+      >
+        <h2 style={{ color: "var(--color-walnut)", marginBottom: 8 }}>Events</h2>
 
-      {busy ? <div>Loading events…</div> : null}
+        {busy ? <div>Loading events…</div> : null}
 
-      {!busy && error ? (
-        <div style={{ color: "darkred" }}>
-          <strong>Could not load events.</strong> {error}
-        </div>
-      ) : null}
+        {!busy && error ? (
+          <div style={{ color: "darkred" }}>
+            <strong>Could not load events.</strong> {error}
+          </div>
+        ) : null}
 
-      {!busy && !error && events.length === 0 ? <div>No upcoming events at the moment.</div> : null}
+        {!busy && !error && events.length === 0 ? <div>No upcoming events at the moment.</div> : null}
 
-      {!busy && !error && events.length > 0 ? (
-        <div style={{ display: "flex", flexDirection: "column", gap: 14, marginTop: 12 }}>
-          {events.map((ev) => {
-            const dateLine = formatDateRange(ev.date, ev.endDate);
+        {!busy && !error && events.length > 0 ? (
+          <div style={{ display: "flex", flexDirection: "column", gap: 14, marginTop: 12 }}>
+            {events.map((ev) => {
+              const dateLine = formatDateRange(ev.date, ev.endDate);
 
-            return (
-              <div
-                key={ev._id}
-                style={{
-                  border: "1px solid rgba(0,0,0,0.12)",
-                  borderRadius: 12,
-                  padding: 14,
-                  background: "rgba(255,255,255,0.65)",
-                  boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
-                }}
-              >
-                <div style={{ fontSize: 18, fontWeight: 800, color: "var(--color-walnut)" }}>
-                  {ev.title}
-                </div>
-
-                {dateLine ? (
-                  <div style={{ marginTop: 6, opacity: 0.85 }}>
-                    <strong>Date:</strong> {dateLine}
+              return (
+                <div
+                  key={ev._id}
+                  style={{
+                    border: "1px solid rgba(0,0,0,0.12)",
+                    borderRadius: 12,
+                    padding: 14,
+                    background: "rgba(255,255,255,0.65)",
+                    boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
+                  }}
+                >
+                  <div style={{ fontSize: 18, fontWeight: 800, color: "var(--color-walnut)" }}>
+                    {ev.title}
                   </div>
-                ) : null}
 
-                <div style={{ marginTop: 8, whiteSpace: "pre-wrap", lineHeight: 1.6 }}>
-                  {ev.description}
-                </div>
-
-                {Array.isArray(ev.images) && ev.images.length > 0 ? (
-                  <div style={{ marginTop: 10 }}>
-                    <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
-                      {ev.images.slice(0, 6).map((img) => (
-                        <img
-                          key={img._id}
-                          src={img.url}
-                          alt=""
-                          style={{
-                            width: 140,
-                            height: 100,
-                            objectFit: "cover",
-                            borderRadius: 10,
-                            boxShadow: "0 2px 6px rgba(0,0,0,0.10)",
-                          }}
-                          loading="lazy"
-                        />
-                      ))}
+                  {dateLine ? (
+                    <div style={{ marginTop: 6, opacity: 0.85 }}>
+                      <strong>Date:</strong> {dateLine}
                     </div>
+                  ) : null}
+
+                  <div style={{ marginTop: 8, whiteSpace: "pre-wrap", lineHeight: 1.6 }}>
+                    {ev.description}
                   </div>
-                ) : null}
-              </div>
-            );
-          })}
+
+                  {Array.isArray(ev.images) && ev.images.length > 0 ? (
+                    <div style={{ marginTop: 10 }}>
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
+                        {ev.images.slice(0, 6).map((img, index) => (
+                          <img
+                            key={img._id}
+                            src={img.url}
+                            alt=""
+                            onClick={() => setSelectedImage({ url: img.url, alt: `${ev.title} image ${index + 1}` })}
+                            style={{
+                              width: 140,
+                              height: 100,
+                              objectFit: "cover",
+                              borderRadius: 10,
+                              boxShadow: "0 2px 6px rgba(0,0,0,0.10)",
+                              cursor: "pointer",
+                            }}
+                            loading="lazy"
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  ) : null}
+                </div>
+              );
+            })}
+          </div>
+        ) : null}
+      </section>
+
+      {selectedImage && (
+        <div
+          onClick={() => setSelectedImage(null)}
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            backgroundColor: "rgba(0,0,0,0.82)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 10000,
+            padding: 20,
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              position: "relative",
+              maxWidth: "95vw",
+              maxHeight: "95vh",
+            }}
+          >
+            <button
+              onClick={() => setSelectedImage(null)}
+              style={{
+                position: "absolute",
+                top: -12,
+                right: -12,
+                width: 40,
+                height: 40,
+                borderRadius: "50%",
+                border: "none",
+                background: "white",
+                color: "#333",
+                fontSize: 24,
+                lineHeight: 1,
+                cursor: "pointer",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.25)",
+              }}
+            >
+              &times;
+            </button>
+
+            <img
+              src={selectedImage.url}
+              alt={selectedImage.alt}
+              style={{
+                maxWidth: "95vw",
+                maxHeight: "90vh",
+                width: "auto",
+                height: "auto",
+                borderRadius: 12,
+                boxShadow: "0 4px 20px rgba(0,0,0,0.35)",
+                display: "block",
+              }}
+            />
+          </div>
         </div>
-      ) : null}
-    </section>
+      )}
+    </>
   );
 }
 
