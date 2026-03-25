@@ -43,7 +43,6 @@ function PublicEvents() {
   const [events, setEvents] = useState([]);
   const [busy, setBusy] = useState(true);
   const [error, setError] = useState("");
-  const [selectedImage, setSelectedImage] = useState(null);
 
   async function load() {
     setError("");
@@ -75,235 +74,134 @@ function PublicEvents() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(() => {
-    function handleKeyDown(e) {
-      if (e.key === "Escape") {
-        setSelectedImage(null);
-      }
-    }
-
-    if (selectedImage) {
-      window.addEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = "hidden";
-    }
-
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = "";
-    };
-  }, [selectedImage]);
-
   return (
-    <>
-      <section
-        style={{
-          width: "100%",
-          maxWidth: 720,
-          margin: "0 auto 48px auto",
-          background: "var(--color-sky)",
-          padding: 20,
-          borderRadius: 12,
-          boxShadow: "0 2px 8px rgba(120,80,40,0.06)",
-        }}
-      >
-        <h2 style={{ color: "var(--color-walnut)", marginBottom: 8 }}>Events</h2>
+    <section
+      style={{
+        width: "100%",
+        maxWidth: 720,
+        margin: "0 auto 48px auto",
+        background: "var(--color-sky)",
+        padding: 20,
+        borderRadius: 12,
+        boxShadow: "0 2px 8px rgba(120,80,40,0.06)",
+      }}
+    >
+      <h2 style={{ color: "var(--color-walnut)", marginBottom: 8 }}>Events</h2>
 
-        {busy ? <div>Loading events…</div> : null}
+      {busy ? <div>Loading events…</div> : null}
 
-        {!busy && error ? (
-          <div style={{ color: "darkred" }}>
-            <strong>Could not load events.</strong> {error}
-          </div>
-        ) : null}
-
-        {!busy && !error && events.length === 0 ? <div>No upcoming events at the moment.</div> : null}
-
-        {!busy && !error && events.length > 0 ? (
-          <div style={{ display: "flex", flexDirection: "column", gap: 14, marginTop: 12 }}>
-            {events.map((ev) => {
-              const dateLine = formatDateRange(ev.date, ev.endDate);
-
-              return (
-                <div
-                  key={ev._id}
-                  style={{
-                    border: "1px solid rgba(0,0,0,0.12)",
-                    borderRadius: 12,
-                    padding: 14,
-                    background: "rgba(255,255,255,0.65)",
-                    boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
-                  }}
-                >
-                  <div style={{ fontSize: 18, fontWeight: 800, color: "var(--color-walnut)" }}>
-                    {ev.title}
-                  </div>
-
-                  {dateLine ? (
-                    <div style={{ marginTop: 6, opacity: 0.85 }}>
-                      <strong>Date:</strong> {dateLine}
-                    </div>
-                  ) : null}
-
-                  <div style={{ marginTop: 8, whiteSpace: "pre-wrap", lineHeight: 1.6 }}>
-                    {ev.description}
-                  </div>
-
-                  {Array.isArray(ev.images) && ev.images.length > 0 ? (
-                    <div style={{ marginTop: 10 }}>
-                      <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
-                        {ev.images.map((img, index) => (
-                          <button
-                            key={img._id || `${ev._id}-img-${index}`}
-                            type="button"
-                            onClick={() =>
-                              setSelectedImage({
-                                url: img.url,
-                                title: ev.title,
-                              })
-                            }
-                            style={{
-                              border: "none",
-                              background: "transparent",
-                              padding: 0,
-                              cursor: "pointer",
-                              borderRadius: 10,
-                            }}
-                            aria-label={`Open full size image for ${ev.title}`}
-                          >
-                            <img
-                              src={img.url}
-                              alt={`${ev.title} image ${index + 1}`}
-                              style={{
-                                width: 140,
-                                height: 100,
-                                objectFit: "cover",
-                                borderRadius: 10,
-                                boxShadow: "0 2px 6px rgba(0,0,0,0.10)",
-                                display: "block",
-                              }}
-                              loading="lazy"
-                            />
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  ) : null}
-                </div>
-              );
-            })}
-          </div>
-        ) : null}
-      </section>
-
-      {selectedImage ? (
-        <div
-          onClick={() => setSelectedImage(null)}
-          style={{
-            position: "fixed",
-            inset: 0,
-            background: "rgba(0,0,0,0.82)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 10000,
-            padding: 20,
-          }}
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              position: "relative",
-              maxWidth: "95vw",
-              maxHeight: "95vh",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <button
-              type="button"
-              onClick={() => setSelectedImage(null)}
-              aria-label="Close image viewer"
-              style={{
-                position: "absolute",
-                top: -12,
-                right: -12,
-                width: 40,
-                height: 40,
-                borderRadius: "50%",
-                border: "none",
-                background: "white",
-                color: "#333",
-                fontSize: 24,
-                lineHeight: 1,
-                cursor: "pointer",
-                boxShadow: "0 2px 8px rgba(0,0,0,0.25)",
-              }}
-            >
-              ×
-            </button>
-
-            <img
-              src={selectedImage.url}
-              alt={selectedImage.title || "Event image"}
-              style={{
-                maxWidth: "95vw",
-                maxHeight: "90vh",
-                width: "auto",
-                height: "auto",
-                borderRadius: 12,
-                boxShadow: "0 4px 20px rgba(0,0,0,0.35)",
-                background: "white",
-              }}
-            />
-          </div>
+      {!busy && error ? (
+        <div style={{ color: "darkred" }}>
+          <strong>Could not load events.</strong> {error}
         </div>
       ) : null}
-    </>
+
+      {!busy && !error && events.length === 0 ? <div>No upcoming events at the moment.</div> : null}
+
+      {!busy && !error && events.length > 0 ? (
+        <div style={{ display: "flex", flexDirection: "column", gap: 14, marginTop: 12 }}>
+          {events.map((ev) => {
+            const dateLine = formatDateRange(ev.date, ev.endDate);
+
+            return (
+              <div
+                key={ev._id}
+                style={{
+                  border: "1px solid rgba(0,0,0,0.12)",
+                  borderRadius: 12,
+                  padding: 14,
+                  background: "rgba(255,255,255,0.65)",
+                  boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
+                }}
+              >
+                <div style={{ fontSize: 18, fontWeight: 800, color: "var(--color-walnut)" }}>
+                  {ev.title}
+                </div>
+
+                {dateLine ? (
+                  <div style={{ marginTop: 6, opacity: 0.85 }}>
+                    <strong>Date:</strong> {dateLine}
+                  </div>
+                ) : null}
+
+                <div style={{ marginTop: 8, whiteSpace: "pre-wrap", lineHeight: 1.6 }}>
+                  {ev.description}
+                </div>
+
+                {Array.isArray(ev.images) && ev.images.length > 0 ? (
+                  <div style={{ marginTop: 10 }}>
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
+                      {ev.images.slice(0, 6).map((img) => (
+                        <img
+                          key={img._id}
+                          src={img.url}
+                          alt=""
+                          style={{
+                            width: 140,
+                            height: 100,
+                            objectFit: "cover",
+                            borderRadius: 10,
+                            boxShadow: "0 2px 6px rgba(0,0,0,0.10)",
+                          }}
+                          loading="lazy"
+                        />
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+              </div>
+            );
+          })}
+        </div>
+      ) : null}
+    </section>
   );
 }
 
 function PublicHome() {
   const [showModal, setShowModal] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [error, setError] = useState("");
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
     phone: "",
     email: "",
   });
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
 
   const handleChange = (e) => {
-    setFormData((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value,
-    }));
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
-    setSuccess(false);
 
+    const { firstName, lastName, phone } = formData;
+    if (!firstName || !lastName || !phone) {
+      setError("Please fill in all required fields.");
+      return;
+    }
+
+    setError("");
     try {
       await emailjs.send(
-        "service_4z5j5pn",
-        "template_jfao6cc",
-        formData,
-        "9Q7v5xT2f0Y8dV8xA"
+        "service_w3wow1f",
+        "template_umzmvvk",
+        {
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          phone: formData.phone,
+          email: formData.email,
+          name: `${formData.firstName} ${formData.lastName}`,
+          time: new Date().toLocaleString(),
+          message: `This volunteer submission came from the Aggie’s Attic website.`,
+        },
+        "dJ9MkGLeOpywjjXtm"
       );
-
       setSuccess(true);
-      setFormData({
-        firstName: "",
-        lastName: "",
-        phone: "",
-        email: "",
-      });
-    } catch (err) {
-      console.error(err);
-      setError("Something went wrong. Please try again.");
+      setFormData({ firstName: "", lastName: "", phone: "", email: "" });
+    } catch {
+      setError("There was an error sending your request. Please try again later.");
     }
   };
 
@@ -311,74 +209,44 @@ function PublicHome() {
     <div
       style={{
         minHeight: "100vh",
-        background: "var(--color-cream)",
-        color: "var(--color-walnut)",
-        fontFamily: "'Segoe UI', Arial, sans-serif",
+        background: "var(--color-bg)",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        paddingBottom: 40,
       }}
     >
-      {/* Header */}
-      <header
+      {/* Logo and Tagline */}
+      <img src={logo} alt="Aggies Attic logo" style={{ width: 320, maxWidth: "100%", marginBottom: 8 }} />
+      <div
         style={{
-          width: "100%",
-          background: "var(--color-teal)",
-          padding: "1.5rem 0 1rem 0",
-          marginBottom: 24,
-          boxShadow: "0 2px 8px rgba(120,80,40,0.04)",
+          fontFamily: "'Pacifico', cursive, serif",
+          fontSize: 24,
+          color: "var(--color-walnut)",
+          marginBottom: 2,
         }}
-      >
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-          <img
-            src={logo}
-            alt="Aggie's Attic logo"
-            style={{
-              width: 160,
-              maxWidth: "80vw",
-              marginBottom: 8,
-              filter: "drop-shadow(0 2px 4px rgba(120,80,40,0.08))",
-            }}
-          />
-          <h1 style={{ margin: 0, fontSize: "2.2rem", letterSpacing: "0.02em" }}>Aggie's Attic</h1>
-        </div>
-      </header>
+      ></div>
 
-      {/* Hero Section */}
-      <section
+      {/* About/Hours - 2 columns */}
+      <div
         style={{
-          width: "90%",
-          maxWidth: 900,
           display: "flex",
-          flexWrap: "wrap",
-          gap: 32,
-          alignItems: "center",
           justifyContent: "center",
+          gap: 48,
+          maxWidth: 820,
+          width: "100%",
           marginBottom: 40,
         }}
       >
-        <div style={{ flex: 1, minWidth: 260 }}>
-          <img
-            src={aboutUs}
-            alt="About Aggie's Attic"
-            style={{
-              width: "100%",
-              maxWidth: 400,
-              borderRadius: 18,
-              boxShadow: "0 4px 16px rgba(120,80,40,0.10)",
-              objectFit: "cover",
-            }}
-          />
-        </div>
-        <div style={{ flex: 1, minWidth: 260 }}>
-          <h2 style={{ color: "var(--color-walnut)", marginBottom: 12 }}>About Us</h2>
+        {/* About Us */}
+        <section style={{ flex: 1 }}>
+          <img src={aboutUs} alt="Agnes About Us" style={{ width: 320, maxWidth: "100%", marginBottom: 8 }} />
+
           <p style={{ lineHeight: 1.6, marginBottom: 12 }}>
-            Aggie&apos;s Attic is a nonprofit resale store operated by Greenwood United Methodist Church and supported through
+            <strong>Aggie’s Attic</strong> is a community thrift store run entirely by volunteers and supported through
             generous donations.
           </p>
           <p style={{ lineHeight: 1.6, marginBottom: 12 }}>
-            With regular financial contributions from donors like you, we&apos;re able to support local students and
+            With regular financial contributions from donors like you, we’re able to support local students and
             organizations throughout our community.
           </p>
           <p style={{ lineHeight: 1.6, marginBottom: 12 }}>
@@ -394,31 +262,17 @@ function PublicHome() {
               Center (The ACE Center).
             </li>
             <li>
-              Community outreach programs including <strong>Greenwood UMC&apos;s Food Donation Connection</strong>,{" "}
+              Community outreach programs including <strong>Greenwood UMC’s Food Donation Connection</strong>,{" "}
               <strong>United Methodist Family Services</strong>, and other local initiatives serving those in need.
             </li>
           </ul>
-          <p style={{ lineHeight: 1.6 }}>Together, we&apos;re making a difference—one donation at a time.</p>
-        </div>
-      </section>
+          <p style={{ lineHeight: 1.6 }}>Together, we’re making a difference—one donation at a time.</p>
+        </section>
 
-      {/* Hours & Location */}
-      <section
-        style={{
-          width: "90%",
-          maxWidth: 900,
-          display: "flex",
-          flexWrap: "wrap",
-          gap: 32,
-          alignItems: "stretch",
-          justifyContent: "center",
-          marginBottom: 40,
-        }}
-      >
+        {/* Hours & Location */}
         <section
           style={{
             flex: 1,
-            minWidth: 260,
             background: "var(--color-sky)",
             padding: 20,
             borderRadius: 12,
@@ -431,22 +285,38 @@ function PublicHome() {
           <h2 style={{ color: "var(--color-walnut)", marginBottom: 8 }}>Hours &amp; Location</h2>
           <div>
             <div style={{ display: "grid", gridTemplateColumns: "120px auto", rowGap: 6, marginBottom: 16 }}>
-              <div><strong>Sunday:</strong></div>
+              <div>
+                <strong>Sunday:</strong>
+              </div>
               <div>CLOSED</div>
-              <div><strong>Monday:</strong></div>
+              <div>
+                <strong>Monday:</strong>
+              </div>
               <div>CLOSED</div>
-              <div><strong>Tuesday:</strong></div>
+              <div>
+                <strong>Tuesday:</strong>
+              </div>
               <div>CLOSED</div>
-              <div><strong>Wednesday:</strong></div>
+              <div>
+                <strong>Wednesday:</strong>
+              </div>
               <div>11:00am – 4:00pm</div>
-              <div><strong>Thursday:</strong></div>
+              <div>
+                <strong>Thursday:</strong>
+              </div>
               <div>11:00am – 4:00pm</div>
-              <div><strong>Friday:</strong></div>
+              <div>
+                <strong>Friday:</strong>
+              </div>
               <div>11:00am – 4:00pm</div>
-              <div><strong>Saturday:</strong></div>
+              <div>
+                <strong>Saturday:</strong>
+              </div>
               <div>11:00am – 4:00pm</div>
             </div>
-
+            <br />
+            <br />
+            <br />
             <p style={{ marginBottom: 12 }}>
               <strong>The HUB Shopping Center</strong>
               <br />
@@ -454,7 +324,6 @@ function PublicHome() {
               <br />
               Henrico, VA
             </p>
-
             <div
               style={{
                 width: "100%",
@@ -473,14 +342,15 @@ function PublicHome() {
                 allowFullScreen=""
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
-              />
+              ></iframe>
             </div>
           </div>
         </section>
-      </section>
+      </div>
 
       {/* Volunteer */}
       <section style={{ textAlign: "center", width: "100%", marginBottom: 40 }}>
+        <h2 style={{ color: "var(--color-walnut)", marginBottom: 16 }}></h2>
         <button
           onClick={() => setShowModal(true)}
           style={{
@@ -499,7 +369,7 @@ function PublicHome() {
         </button>
       </section>
 
-      {/* Events */}
+      {/* Events (PUBLIC) — now DB-driven */}
       <PublicEvents />
 
       {/* Footer */}
@@ -525,7 +395,7 @@ function PublicHome() {
             Facebook
           </a>
           <br />
-          Follow Aggie&apos;s Attic Furniture Shed on{" "}
+          Follow Aggie's Attic Furniture Shed on{" "}
           <img src={facebookIcon} alt="Facebook" style={{ width: 20, height: 20 }} />
           <a
             href="https://www.facebook.com/profile.php?id=100070282226048"
@@ -536,22 +406,18 @@ function PublicHome() {
             Facebook
           </a>
           <br />
-          Visit{" "}
-          <a
-            href="https://www.gumcva.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{ color: "var(--color-teal)", textDecoration: "underline" }}
-          >
-            Greenwood United Methodist Church
-          </a>
+          Visit <a
+                  href="https://www.gumcva.org/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ color: "var(--color-teal)", textDecoration: "underline" }}>Greenwood United Methodist Church</a>
         </p>
         <p style={{ margin: 0, fontSize: 14 }}>
-          &copy; {new Date().getFullYear()} Aggie&apos;s Attic. All rights reserved.
+          &copy; {new Date().getFullYear()} Aggie's Attic. All rights reserved.
         </p>
       </footer>
 
-      {showModal ? (
+      {showModal && (
         <div
           style={{
             position: "fixed",
@@ -592,9 +458,8 @@ function PublicHome() {
               &times;
             </button>
             <h3 style={{ marginBottom: 16, color: "var(--color-walnut)" }}>Volunteer Sign-Up</h3>
-            {error ? <p style={{ color: "red", marginBottom: 8 }}>{error}</p> : null}
-            {success ? <p style={{ color: "green", marginBottom: 8 }}>Thanks! Your info has been submitted.</p> : null}
-
+            {error && <p style={{ color: "red", marginBottom: 8 }}>{error}</p>}
+            {success && <p style={{ color: "green", marginBottom: 8 }}>Thanks! Your info has been submitted.</p>}
             <form onSubmit={handleSubmit}>
               <input
                 type="text"
@@ -649,7 +514,7 @@ function PublicHome() {
             </form>
           </div>
         </div>
-      ) : null}
+      )}
     </div>
   );
 }
@@ -657,8 +522,10 @@ function PublicHome() {
 export default function App() {
   return (
     <Routes>
+      {/* Public */}
       <Route path="/" element={<PublicHome />} />
 
+      {/* Admin (logo + events only) */}
       <Route path="/admin" element={<AdminLayout />}>
         <Route index element={<AdminLoginPage />} />
         <Route
@@ -671,6 +538,7 @@ export default function App() {
         />
       </Route>
 
+      {/* Fallback */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
