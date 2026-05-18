@@ -406,7 +406,7 @@ function PublicHome() {
             <p style={{ marginBottom: 12 }}>
               <strong>The HUB Shopping Center</strong>
               <br />
-              <strong>6913 Lakeside Ave</strong>
+              <strong>5522 B Lakeside Ave</strong>
               <br />
               Henrico, VA
             </p>
