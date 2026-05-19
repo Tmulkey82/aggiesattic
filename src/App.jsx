@@ -419,16 +419,8 @@ function PublicHome() {
                 boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
               }}
             >
-              <iframe
-                title="Aggie's Attic Location"
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3110.021824492644!2d-77.48964272376462!3d37.61125787202621!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89b116eb12914955%3A0x5dd9e1a9ae77c944!2s6913%20Lakeside%20Ave%2C%20Henrico%2C%20VA%2023228!5e0!3m2!1sen!2sus!4v1721130099613!5m2!1sen!2sus"
-                width="100%"
-                height="100%"
-                style={{ border: 0 }}
-                allowFullScreen=""
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-              ></iframe>
+              <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3341.099939363967!2d-77.47060888096706!3d37.60516354576365!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89b1167fcfec9fd3%3A0x2c1fae6badccd54f!2s5522-B%20Lakeside%20Ave%2C%20Richmond%2C%20VA%2023228!5e0!3m2!1sen!2sus!4v1779148903133!5m2!1sen!2sus" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+
             </div>
           </div>
         </section>
